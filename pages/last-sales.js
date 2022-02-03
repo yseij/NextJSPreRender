@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 
-function LastSalesPage() {
-  const [sales, setSales] = useState();
-  const [isLoading, setIsloading] = useState();
+function LastSalesPage(props) {
+  const [sales, setSales] = useState(props.sales);
+  // const [isLoading, setIsloading] = useState();
 
   const { data, error } = useSWR(
     "https://nextjs-course-a7168-default-rtdb.firebaseio.com/sales.json",
@@ -46,7 +46,7 @@ function LastSalesPage() {
     return <p>Failed to load</p>;
   }
 
-  if (!data || !sales) {
+  if (!data && !sales) {
     return <p>Loading...1</p>;
   }
 
@@ -59,6 +59,23 @@ function LastSalesPage() {
       ))}
     </ul>
   );
+}
+
+export async function getStaticProps() {
+  const response = await fetch(
+    "https://nextjs-course-a7168-default-rtdb.firebaseio.com/sales.json"
+  );
+  const data = await response.json();
+
+  const transformedSales = [];
+  for (const key in data) {
+    transformedSales.push({
+      id: key,
+      username: data[key].username,
+      volume: data[key].volume,
+    });
+  }
+  return { props: { sales: transformedSales } };
 }
 
 export default LastSalesPage;
